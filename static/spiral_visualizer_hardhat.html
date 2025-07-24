@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zkBg Spiral NFT Minter - Hardhat Local</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #424242 0%, #1c1424 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .wallet-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .wallet-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .network-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        
+        .network-badge.hardhat {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+        
+        .network-badge.wrong {
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status.connected {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+        
+        .control-group input, .control-group select {
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+            width: 80px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ffd700);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 0 10px;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.primary {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            font-size: 1.1em;
+            padding: 15px 30px;
+        }
+        
+        .canvas-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .canvas-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .canvas-wrapper h3 {
+            color: #333;
+            text-align: center;
+            margin: 0 0 15px 0;
+            font-size: 1.2em;
+        }
+        
+        canvas {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        .mint-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .mint-preview {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .mint-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .transaction-status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .transaction-status.show {
+            display: block;
+        }
+        
+        .address {
+            font-family: monospace;
+            font-size: 0.9em;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .hardhat-info {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌀 zkBg NFT Minter</h1>
+        <p class="subtitle" style="text-align: center; opacity: 0.8; margin-bottom: 30px;">Mint ZK-verified spirals on Hardhat Local Network</p>
+        
+        <!-- Hardhat Info Banner -->
+        <div class="hardhat-info">
+            <h3>🔧 Hardhat Local Development</h3>
+            <p><strong>Network:</strong> localhost:8545 (Chain ID: 1337)</p>
+            <p><strong>Benefits:</strong> Unlimited ETH • Instant transactions • Accurate gas estimates</p>
+            <p><strong>Setup:</strong> Run <code>npx hardhat node</code> in another terminal</p>
+            <div style="margin-top: 10px;">
+                <small>Contract Address: <span id="contractAddressDisplay">Not loaded</span></small>
+                <button onclick="manualContractSetup()" style="padding: 5px 10px; font-size: 0.8em; margin-left: 10px;">Manual Setup</button>
+            </div>
+        </div>
+        
+        <!-- Wallet Connection Section -->
+        <div class="wallet-section">
+            <button id="connectWallet" onclick="connectWallet()">🦊 Connect MetaMask</button>
+            <div class="wallet-info" id="walletInfo" style="display: none;">
+                <span>Connected: <span class="address" id="walletAddress">0x...</span></span>
+                <span class="network-badge" id="networkBadge">Checking...</span>
+            </div>
+        </div>
+        
+        <div id="status" class="status">Checking connection...</div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Seed</label>
+                <input type="number" id="seed" value="12345" min="0" max="999999">
+            </div>
+            <div class="control-group">
+                <label>Canvas Size</label>
+                <input type="number" id="canvasSize" value="500" min="300" max="800">
+            </div>
+            <div class="control-group">
+                <label>Triangle Style</label>
+                <select id="triangleStyle">
+                    <option value="filled">Filled</option>
+                    <option value="outlined">Outlined</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Color Mode</label>
+                <select id="colorMode">
+                    <option value="arms">By Arm</option>
+                    <option value="distance">By Distance</option>
+                    <option value="rainbow">Rainbow</option>
+                </select>
+            </div>
+            <button onclick="generateSpiral()" id="generateBtn">🎨 Generate from ZK Circuit</button>
+            <button onclick="randomSeed()">🎲 Random Seed</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating spiral using ZK circuit...</p>
+        </div>
+        
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <h3>ZK-Generated Spiral Pattern</h3>
+                <canvas id="spiralCanvas" width="500" height="500"></canvas>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h3>ZK Circuit Output</h3>
+            <div id="patternInfo">Click "Generate from ZK Circuit" to see pattern details</div>
+            <div class="stats" id="stats"></div>
+        </div>
+        
+        <!-- Gas Cost Panel - Hardhat with Real Gas Prices -->
+        <div class="info-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>⛽ Gas Costs (Hardhat + Live Prices)</h3>
+                <button onclick="estimateGas()" style="padding: 8px 16px; font-size: 0.9em;">🔄 Estimate Gas</button>
+            </div>
+            <div id="gasInfo">Connect wallet and generate a spiral to estimate gas</div>
+            <div class="stats" id="gasStats"></div>
+            <div id="gasBreakdown" style="margin-top: 15px;"></div>
+        </div>
+        
+        <!-- Minting Section -->
+        <div class="mint-section" id="mintSection" style="display: none;">
+            <h3>🎨 Mint Your Spiral NFT</h3>
+            <div class="mint-preview">
+                <div class="mint-info">
+                    <h4>NFT Details</h4>
+                    <p><strong>Seed:</strong> <span id="mintSeed">-</span></p>
+                    <p><strong>Type:</strong> <span id="mintType">-</span></p>
+                    <p><strong>Arms:</strong> <span id="mintArms">-</span></p>
+                    <p><strong>Triangles:</strong> <span id="mintTriangles">-</span></p>
+                </div>
+                <div class="mint-info">
+                    <h4>Estimated Cost</h4>
+                    <p><strong>Gas Units:</strong> <span id="mintGasUnits">-</span></p>
+                    <p><strong>ETH Cost:</strong> <span id="mintEthCost">-</span></p>
+                    <p><strong>USD Cost:</strong> <span id="mintUsdCost">-</span></p>
+                    <p style="font-size: 0.9em; opacity: 0.8;">*Using live mainnet gas prices</p>
+                </div>
+            </div>
+            <button class="primary" onclick="mintNFT()" id="mintButton">🚀 Mint NFT on Hardhat</button>
+            <div class="transaction-status" id="transactionStatus">
+                <h4>Transaction Status</h4>
+                <p id="txStatusText">Preparing transaction...</p>
+                <p id="txHash" style="display: none;">
+                    TX: <span class="address" id="txLink">0x...</span>
+                </p>
+                <p id="tokenId" style="display: none;">
+                    Token ID: <span class="address" id="tokenIdValue">-</span>
+                </p>
+                <div id="verificationLink" style="display: none; margin-top: 15px;">
+                    <a href="/spiral_verifier.html" target="_blank" style="color: #4ecdc4; text-decoration: none; font-weight: 600;">
+                        🔍 Verify NFT Data Integrity →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ethers.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    
+    <script>
+        // CONTRACT_ADDRESS will be updated after deployment
+        let CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // Update this after deploying
+        const CONTRACT_ABI = [
+            "function mintSpiral(address to, tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder) config, tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex)[] triangles, bytes32 zkProofHash, string tokenURI) returns (uint256)",
+            "function getSpiralConfig(uint256 tokenId) view returns (tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder))",
+            "function balanceOf(address owner) view returns (uint256)",
+            "event SpiralMinted(uint256 indexed tokenId, address indexed minter, uint64 seed, uint8 spiralType, uint8 numArms)"
+        ];
+        
+        let provider;
+        let signer;
+        let contract;
+        let currentSpiralData = null;
+        let serverConnected = false;
+        
+        // Check server connection
+        async function checkConnection() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    serverConnected = true;
+                    document.getElementById('status').textContent = '✅ Connected to zkBg Rust Server';
+                    document.getElementById('status').className = 'status connected';
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                serverConnected = false;
+                document.getElementById('status').textContent = '❌ Cannot connect to Rust server. Run: cargo run';
+                document.getElementById('status').className = 'status error';
+            }
+        }
+        
+        // Connect MetaMask
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('Please install MetaMask to use this feature!');
+                return;
+            }
+            
+            try {
+                // Request account access
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // Create provider and signer
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                
+                // Get connected address
+                const address = await signer.getAddress();
+                
+                // Check network
+                const network = await provider.getNetwork();
+                
+                // Update UI
+                document.getElementById('connectWallet').style.display = 'none';
+                document.getElementById('walletInfo').style.display = 'flex';
+                document.getElementById('walletAddress').textContent = 
+                    address.substring(0, 6) + '...' + address.substring(38);
+                
+                console.log('Network Chain ID:', network.chainId);
+                
+                if (network.chainId === 1337) { // Hardhat
+                    document.getElementById('networkBadge').textContent = '✅ Hardhat Local';
+                    document.getElementById('networkBadge').className = 'network-badge hardhat';
+                    
+                    // Try to read contract address from deployments.json
+                    try {
+                        console.log('Attempting to fetch /deployments.json...');
+                        const deploymentResponse = await fetch('/deployments.json');
+                        console.log('Deployment response status:', deploymentResponse.status);
+                        
+                        if (deploymentResponse.ok) {
+                            const deployment = await deploymentResponse.json();
+                            console.log('Deployment data:', deployment);
+                            console.log('Deployment network:', deployment.network);
+                            
+                            if (deployment.network === 'hardhat' || deployment.network === 'localhost') {
+                                CONTRACT_ADDRESS = deployment.address;
+                                console.log('Updated CONTRACT_ADDRESS to:', CONTRACT_ADDRESS);
+                                document.getElementById('contractAddressDisplay').textContent = CONTRACT_ADDRESS;
+                            } else {
+                                console.log('Network mismatch. Expected hardhat/localhost, got:', deployment.network);
+                            }
+                        } else {
+                            console.log('Failed to fetch deployments.json, status:', deploymentResponse.status);
+                        }
+                    } catch (e) {
+                        console.log('Error loading deployment info:', e);
+                    }
+                    
+                    console.log('Final CONTRACT_ADDRESS check:', CONTRACT_ADDRESS);
+                    console.log('Is it the default?', CONTRACT_ADDRESS === "YOUR_CONTRACT_ADDRESS_HERE");
+                    
+                    if (CONTRACT_ADDRESS && CONTRACT_ADDRESS !== "YOUR_CONTRACT_ADDRESS_HERE") {
+                        console.log('Initializing contract with address:', CONTRACT_ADDRESS);
+                        try {
+                            // Initialize contract
+                            contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                            console.log('Contract initialized successfully');
+                            document.getElementById('mintSection').style.display = 'block';
+                        } catch (contractError) {
+                            console.error('Error initializing contract:', contractError);
+                            alert('Error initializing contract: ' + contractError.message);
+                        }
+                    } else {
+                        console.log('CONTRACT_ADDRESS is still default or empty');
+                        alert('Please deploy the contract first: npx hardhat run scripts/deploy.js --network localhost');
+                    }
+                } else {
+                    document.getElementById('networkBadge').textContent = '❌ Wrong Network';
+                    document.getElementById('networkBadge').className = 'network-badge wrong';
+                    alert('Please switch to Hardhat Local Network!\n\nNetwork: localhost:8545\nChain ID: 1337');
+                }
+                
+                // Listen for network changes
+                window.ethereum.on('chainChanged', () => {
+                    window.location.reload();
+                });
+                
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('Error connecting wallet: ' + error.message);
+            }
+        }
+        
+        // Generate spiral using actual ZK circuit
+        async function generateSpiral() {
+            if (!serverConnected) {
+                alert('Please start the Rust server first: cargo run');
+                return;
+            }
+            
+            const seed = parseInt(document.getElementById('seed').value);
+            const canvasSize = parseInt(document.getElementById('canvasSize').value);
+            const triangleStyle = document.getElementById('triangleStyle').value;
+            const colorMode = document.getElementById('colorMode').value;
+            
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('generateBtn').disabled = true;
+            
+            try {
+                // Call your Rust ZK circuit API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        seed: seed,
+                        canvas_size: canvasSize
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                currentSpiralData = data; // Store for minting
+                
+                // Update canvas size
+                const canvas = document.getElementById('spiralCanvas');
+                canvas.width = canvasSize;
+                canvas.height = canvasSize;
+                
+                // Draw the pattern using ZK circuit data
+                drawSpiralFromZKData(canvas, data, triangleStyle, colorMode);
+                
+                // Update info panel
+                updateInfoFromZKData(data);
+                
+                // Update mint preview if wallet connected
+                if (signer) {
+                    updateMintPreview(data);
+                }
+                
+            } catch (error) {
+                console.error('Error generating spiral:', error);
+                alert('Error connecting to ZK circuit: ' + error.message);
+            } finally {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+        
+        // Estimate gas using Hardhat + live gas prices
+        async function estimateGas() {
+            console.log('estimateGas called');
+            console.log('signer exists:', !!signer);
+            console.log('contract exists:', !!contract);
+            console.log('currentSpiralData exists:', !!currentSpiralData);
+            
+            if (!signer || !contract) {
+                console.log('Missing signer or contract');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            if (!currentSpiralData) {
+                console.log('Missing spiral data');
+                alert('Please generate a spiral first!');
+                return;
+            }
+            
+            try {
+                // Prepare transaction data
+                const config = {
+                    seed: currentSpiralData.seed,
+                    variant: currentSpiralData.variant,
+                    spiralType: currentSpiralData.spiral_type,
+                    numArms: currentSpiralData.num_arms,
+                    spiralQuotient: currentSpiralData.config.spiral_quotient,
+                    armsQuotient: currentSpiralData.config.arms_quotient,
+                    armsRemainder: currentSpiralData.config.arms_remainder
+                };
+                
+                // Use ALL triangles for accurate gas estimation
+                const triangles = currentSpiralData.triangles.map(t => ({
+                    x1: t.vertices[0][0],
+                    y1: t.vertices[0][1],
+                    x2: t.vertices[1][0],
+                    y2: t.vertices[1][1],
+                    x3: t.vertices[2][0],
+                    y3: t.vertices[2][1],
+                    armIndex: t.arm_index,
+                    triangleIndex: t.triangle_index
+                }));
+                
+                console.log(`Using ${triangles.length} triangles for gas estimation`);
+                
+                // Generate ZK proof hash (simplified)
+                const zkProofHash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes(JSON.stringify(config))
+                );
+                
+                // Simple on-chain SVG URI
+                const tokenURI = `data:application/json;base64,${btoa(JSON.stringify({
+                    name: `zkBg Spiral #${currentSpiralData.seed}`,
+                    description: `ZK-verified spiral pattern with ${currentSpiralData.num_arms} arms`,
+                    image: `data:image/svg+xml;base64,${btoa(generateSVG(currentSpiralData))}`
+                }))}`;
+                
+                // Estimate gas on Hardhat
+                const address = await signer.getAddress();
+                const gasEstimate = await contract.estimateGas.mintSpiral(
+                    address,
+                    config,
+                    triangles,
+                    zkProofHash,
+                    tokenURI
+                );
+                
+                // Fetch REAL gas prices from Etherscan (for mainnet equivalence)
+                const priceResponse = await fetch('/api/gas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ seed: currentSpiralData.seed })
+                });
+                
+                let gasPriceGwei = 20; // Fallback
+                let ethPriceUsd = 3000; // Fallback
+                
+                if (priceResponse.ok) {
+                    const priceData = await priceResponse.json();
+                    gasPriceGwei = priceData.gas_price_gwei || 20;
+                    ethPriceUsd = priceData.eth_price_usd || 3000;
+                }
+                
+                // Calculate costs using REAL gas prices
+                const gasPriceWei = ethers.utils.parseUnits(gasPriceGwei.toString(), 'gwei');
+                const totalCostWei = gasEstimate.mul(gasPriceWei);
+                const totalCostEth = ethers.utils.formatEther(totalCostWei);
+                const totalCostUsd = parseFloat(totalCostEth) * ethPriceUsd;
+                
+                // Display results
+                displayRealGasCosts({
+                    gasEstimate: gasEstimate.toString(),
+                    gasPrice: gasPriceGwei.toFixed(1),
+                    totalCostEth: totalCostEth,
+                    totalCostUsd: totalCostUsd,
+                    ethPriceUsd: ethPriceUsd,
+                    triangleCount: triangles.length,
+                    network: 'Hardhat Local (Real Prices)'
+                });
+                
+            } catch (error) {
+                console.error('Error estimating gas:', error);
+                alert('Error estimating gas: ' + error.message);
+            }
+        }
+        
+        // Mint NFT on Hardhat
+        async function mintNFT() {
+            console.log('mintNFT called');
+            console.log('signer exists:', !!signer);
+            console.log('contract exists:', !!contract);
+            console.log('currentSpiralData exists:', !!currentSpiralData);
+            
+            if (!signer || !contract) {
+                console.log('Missing signer or contract for minting');
+                alert('Please connect your wallet first!');
+                return;
+            }
+            
+            if (!currentSpiralData) {
+                console.log('Missing spiral data for minting');
+                alert('Please generate a spiral first!');
+                return;
+            }
+            
+            const mintButton = document.getElementById('mintButton');
+            const txStatus = document.getElementById('transactionStatus');
+            const txStatusText = document.getElementById('txStatusText');
+            
+            try {
+                mintButton.disabled = true;
+                txStatus.classList.add('show');
+                txStatusText.textContent = 'Preparing transaction...';
+                
+                // Prepare transaction data
+                const config = {
+                    seed: currentSpiralData.seed,
+                    variant: currentSpiralData.variant,
+                    spiralType: currentSpiralData.spiral_type,
+                    numArms: currentSpiralData.num_arms,
+                    spiralQuotient: currentSpiralData.config.spiral_quotient,
+                    armsQuotient: currentSpiralData.config.arms_quotient,
+                    armsRemainder: currentSpiralData.config.arms_remainder
+                };
+                
+                // Use ALL triangles for minting (no artificial limit)
+                const triangles = currentSpiralData.triangles.map(t => ({
+                    x1: t.vertices[0][0],
+                    y1: t.vertices[0][1],
+                    x2: t.vertices[1][0],
+                    y2: t.vertices[1][1],
+                    x3: t.vertices[2][0],
+                    y3: t.vertices[2][1],
+                    armIndex: t.arm_index,
+                    triangleIndex: t.triangle_index
+                }));
+                
+                console.log(`Minting NFT with ${triangles.length} triangles`);
+                
+                const zkProofHash = ethers.utils.keccak256(
+                    ethers.utils.toUtf8Bytes(JSON.stringify(config))
+                );
+                
+                const tokenURI = `data:application/json;base64,${btoa(JSON.stringify({
+                    name: `zkBg Spiral #${currentSpiralData.seed}`,
+                    description: `ZK-verified spiral pattern with ${currentSpiralData.num_arms} arms`,
+                    image: `data:image/svg+xml;base64,${btoa(generateSVG(currentSpiralData))}`
+                }))}`;
+                
+                const address = await signer.getAddress();
+                
+                txStatusText.textContent = 'Sending transaction to Hardhat...';
+                
+                // Send transaction (instant on Hardhat!)
+                const tx = await contract.mintSpiral(
+                    address,
+                    config,
+                    triangles,
+                    zkProofHash,
+                    tokenURI
+                );
+                
+                // Show transaction hash
+                document.getElementById('txHash').style.display = 'block';
+                document.getElementById('txLink').textContent = tx.hash.substring(0, 10) + '...';
+                
+                txStatusText.textContent = 'Waiting for confirmation (should be instant)...';
+                
+                // Wait for confirmation (instant on Hardhat)
+                const receipt = await tx.wait();
+                
+                // Get token ID from event
+                const event = receipt.events.find(e => e.event === 'SpiralMinted');
+                const tokenId = event.args.tokenId.toString();
+                
+                txStatusText.textContent = '✅ NFT Minted Successfully on Hardhat!';
+                document.getElementById('tokenId').style.display = 'block';
+                document.getElementById('tokenIdValue').textContent = tokenId;
+                document.getElementById('verificationLink').style.display = 'block';
+                
+                txStatusText.innerHTML += `<br><br>🎉 <strong>Success!</strong> Your spiral NFT has been minted locally on Hardhat.<br>Contract: ${CONTRACT_ADDRESS}<br>Token ID: ${tokenId}<br><br>🔍 <strong>Next:</strong> Use the verification link below to prove your NFT data integrity!`;
+                
+            } catch (error) {
+                console.error('Error minting NFT:', error);
+                txStatusText.textContent = '❌ Error: ' + error.message;
+            } finally {
+                mintButton.disabled = false;
+            }
+        }
+        
+        // Helper function to generate SVG
+        function generateSVG(data) {
+            const size = 500;
+            const spiralTypes = ['Tight', 'Loose', 'Classic'];
+            let svg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">`;
+            svg += `<rect width="${size}" height="${size}" fill="#0a0a0a"/>`;
+            
+            // Draw triangles (use more for better SVG representation)
+            const armColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+            data.triangles.slice(0, 50).forEach(triangle => { // Increased from 30 to 50 for better SVGs
+                const color = armColors[triangle.arm_index % armColors.length];
+                svg += `<polygon points="${triangle.vertices.map(v => v.join(',')).join(' ')}" fill="${color}" opacity="0.7"/>`;
+            });
+            
+            svg += `<text x="10" y="490" fill="white" font-family="monospace" font-size="12">`;
+            svg += `Seed: ${data.seed} | Type: ${spiralTypes[data.spiral_type]} | Arms: ${data.num_arms} | ZK Verified`;
+            svg += `</text>`;
+            svg += `</svg>`;
+            
+            return svg;
+        }
+        
+        // Update mint preview
+        function updateMintPreview(data) {
+            const spiralTypes = ['Tight', 'Loose', 'Classic'];
+            document.getElementById('mintSeed').textContent = data.seed;
+            document.getElementById('mintType').textContent = spiralTypes[data.spiral_type];
+            document.getElementById('mintArms').textContent = data.num_arms;
+            document.getElementById('mintTriangles').textContent = data.triangles.length; // Show actual count
+        }
+        
+        // Display real gas costs
+        function displayRealGasCosts(gasData) {
+            document.getElementById('gasInfo').innerHTML = `
+                <strong>Network:</strong> ${gasData.network} | 
+                <strong>Live Gas Price:</strong> ${parseFloat(gasData.gasPrice).toFixed(1)} gwei | 
+                <strong>ETH Price:</strong> $${gasData.ethPriceUsd.toFixed(0)}
+            `;
+            
+            document.getElementById('gasStats').innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${parseInt(gasData.gasEstimate).toLocaleString()}</div>
+                    <div class="stat-label">Gas Units</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${parseFloat(gasData.totalCostEth).toFixed(6)}</div>
+                    <div class="stat-label">ETH Cost</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">$${gasData.totalCostUsd.toFixed(2)}</div>
+                    <div class="stat-label">USD Cost</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${gasData.triangleCount}</div>
+                    <div class="stat-label">Triangles</div>
+                </div>
+            `;
+            
+            document.getElementById('gasBreakdown').innerHTML = `
+                <h4 style="color: #ffd700; margin-bottom: 10px;">💰 Hardhat Gas Estimate (Real Prices)</h4>
+                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px;">
+                    <p style="color: #4ecdc4;">✅ Accurate gas units from Hardhat + live mainnet gas prices</p>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Estimated Gas:</span><span>${parseInt(gasData.gasEstimate).toLocaleString()} units</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Gas Price (Live):</span><span>${parseFloat(gasData.gasPrice).toFixed(1)} gwei</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Total Cost:</span><span>${parseFloat(gasData.totalCostEth).toFixed(6)} ETH</span>
+                    </div>
+                    <hr style="border: 1px solid rgba(255, 255, 255, 0.2); margin: 10px 0;">
+                    <p style="font-size: 0.9em; opacity: 0.8;">
+                        🎯 <strong>Best of both worlds:</strong><br>
+                        • Hardhat provides accurate gas estimates<br>
+                        • Live Etherscan prices for real-world costs<br>
+                        • Unlimited test ETH for development
+                    </p>
+                </div>
+            `;
+            
+            // Update mint preview costs
+            if (currentSpiralData) {
+                document.getElementById('mintGasUnits').textContent = parseInt(gasData.gasEstimate).toLocaleString();
+                document.getElementById('mintEthCost').textContent = parseFloat(gasData.totalCostEth).toFixed(6) + ' ETH';
+                document.getElementById('mintUsdCost').textContent = '$' + gasData.totalCostUsd.toFixed(2);
+            }
+        }
+        
+        // Existing functions from original file (drawSpiralFromZKData, updateInfoFromZKData, randomSeed)
+        function drawSpiralFromZKData(canvas, data, triangleStyle, colorMode) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Background
+            const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
+            gradient.addColorStop(0, '#0a0a0a');
+            gradient.addColorStop(1, '#1a1a1a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Color palettes
+            const armColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#a8e6cf', '#ff8b94'];
+            const rainbowColors = ['#ff0000', '#ff8000', '#ffff00', '#80ff00', '#00ff00', '#00ff80', '#00ffff', '#0080ff', '#0000ff', '#8000ff', '#ff00ff', '#ff0080'];
+            
+            // Draw triangles from ZK circuit data
+            data.triangles.forEach((triangle, index) => {
+                let fillColor, strokeColor;
+                
+                // Determine colors based on mode
+                switch (colorMode) {
+                    case 'arms':
+                        fillColor = armColors[triangle.arm_index % armColors.length];
+                        strokeColor = fillColor;
+                        break;
+                    case 'distance':
+                        fillColor = `hsl(${(triangle.arm_index * 60) % 360}, 70%, ${30 + triangle.triangle_index * 5}%)`;
+                        strokeColor = fillColor;
+                        break;
+                    case 'rainbow':
+                        fillColor = rainbowColors[index % rainbowColors.length];
+                        strokeColor = fillColor;
+                        break;
+                }
+                
+                // Draw triangle
+                ctx.beginPath();
+                ctx.moveTo(triangle.vertices[0][0], triangle.vertices[0][1]);
+                ctx.lineTo(triangle.vertices[1][0], triangle.vertices[1][1]);
+                ctx.lineTo(triangle.vertices[2][0], triangle.vertices[2][1]);
+                ctx.closePath();
+                
+                if (triangleStyle === 'filled' || triangleStyle === 'both') {
+                    ctx.fillStyle = fillColor + '80';
+                    ctx.fill();
+                }
+                
+                if (triangleStyle === 'outlined' || triangleStyle === 'both') {
+                    ctx.strokeStyle = strokeColor;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            });
+            
+            // Draw center point
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        function updateInfoFromZKData(data) {
+            const spiralTypes = ['Tight', 'Loose', 'Classic'];
+            
+            document.getElementById('patternInfo').innerHTML = `
+                <strong>Seed:</strong> ${data.seed} | 
+                <strong>Variant:</strong> ${data.variant} | 
+                <strong>Type:</strong> ${spiralTypes[data.spiral_type]} Spiral | 
+                <strong>Arms:</strong> ${data.num_arms} | 
+                <strong>ZK Verified:</strong> ✅
+            `;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${data.num_arms}</div>
+                    <div class="stat-label">Arms</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.triangles.length}</div>
+                    <div class="stat-label">Triangles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${data.particles.length}</div>
+                    <div class="stat-label">Particles</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${spiralTypes[data.spiral_type]}</div>
+                    <div class="stat-label">Type</div>
+                </div>
+            `;
+        }
+        
+        function randomSeed() {
+            const randomSeed = Math.floor(Math.random() * 100000);
+            document.getElementById('seed').value = randomSeed;
+            generateSpiral();
+        }
+        
+        // Manual contract setup for debugging
+        function manualContractSetup() {
+            const address = prompt('Enter contract address:', '0x5FbDB2315678afecb367f032d93F642f64180aa3');
+            if (address && address.startsWith('0x')) {
+                CONTRACT_ADDRESS = address;
+                document.getElementById('contractAddressDisplay').textContent = CONTRACT_ADDRESS;
+                
+                if (signer) {
+                    try {
+                        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                        document.getElementById('mintSection').style.display = 'block';
+                        alert('Contract setup manually! You can now estimate gas and mint NFTs.');
+                        console.log('Manual contract setup successful:', CONTRACT_ADDRESS);
+                    } catch (error) {
+                        alert('Error setting up contract: ' + error.message);
+                        console.error('Manual contract setup failed:', error);
+                    }
+                } else {
+                    alert('Please connect your wallet first!');
+                }
+            }
+        }
+        
+        // Check connection on load
+        checkConnection();
+        
+        // Auto-connect wallet if available
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
+                if (accounts.length > 0) {
+                    connectWallet();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
