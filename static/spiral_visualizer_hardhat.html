@@ -317,26 +317,30 @@
                 <label>Seed</label>
                 <input type="number" id="seed" value="12345" min="0" max="999999">
             </div>
-            <div class="control-group">
-                <label>Canvas Size</label>
-                <input type="number" id="canvasSize" value="500" min="300" max="800">
+            <!-- Canvas size is now hidden and hardcoded to 420 -->
+            <input type="hidden" id="canvasSize" value="420">
+            
+            <!-- Testing options - will be randomized in production -->
+            <div style="border: 2px dashed #666; padding: 10px; border-radius: 10px;">
+                <p style="margin: 0 0 10px 0; font-size: 0.9em; opacity: 0.8;">🧪 Testing Options (will be random in production)</p>
+                <div class="control-group">
+                    <label>Triangle Style</label>
+                    <select id="triangleStyle">
+                        <option value="filled">Filled</option>
+                        <option value="outlined">Outlined</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Color Mode</label>
+                    <select id="colorMode">
+                        <option value="arms">By Arm</option>
+                        <option value="distance">By Distance</option>
+                        <option value="rainbow">Rainbow</option>
+                    </select>
+                </div>
             </div>
-            <div class="control-group">
-                <label>Triangle Style</label>
-                <select id="triangleStyle">
-                    <option value="filled">Filled</option>
-                    <option value="outlined">Outlined</option>
-                    <option value="both">Both</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label>Color Mode</label>
-                <select id="colorMode">
-                    <option value="arms">By Arm</option>
-                    <option value="distance">By Distance</option>
-                    <option value="rainbow">Rainbow</option>
-                </select>
-            </div>
+            
             <button onclick="generateSpiral()" id="generateBtn">🎨 Generate from ZK Circuit</button>
             <button onclick="randomSeed()">🎲 Random Seed</button>
         </div>
@@ -413,12 +417,20 @@
     
     <script>
         // CONTRACT_ADDRESS will be updated after deployment
-        let CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // Update this after deploying
+        let CONTRACT_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"; // Update this after deploying
         const CONTRACT_ABI = [
-            "function mintSpiral(address to, tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder) config, tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex)[] triangles, bytes32 zkProofHash, string tokenURI) returns (uint256)",
+            "function mintSpiral(address to, tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder) config, tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex, uint8 triangleType, uint8 opacity)[] triangles, bytes32 zkProofHash, string tokenURI) returns (uint256)",
+            "function initializeGalaxy(address to, tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder) config, bytes32 zkProofHash, string tokenURI, uint16 expectedTriangles) returns (uint256)",
+            "function addTriangleBatch(uint256 tokenId, tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex, uint8 triangleType, uint8 opacity)[] triangles, bool isLastBatch)",
             "function getSpiralConfig(uint256 tokenId) view returns (tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder))",
+            "function getTriangleCount(uint256 tokenId) view returns (uint256)",
+            "function getTriangleData(uint256 tokenId, uint256 index) view returns (tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex, uint8 triangleType, uint8 opacity))",
+            "function getGalaxyMetadata(uint256 tokenId) view returns (tuple(uint16 particlesPerArm, uint16 totalTriangles, uint8 galaxyType, uint8 complexityLevel, bool isComplete))",
+            "function isGalaxyComplete(uint256 tokenId) view returns (bool)",
             "function balanceOf(address owner) view returns (uint256)",
-            "event SpiralMinted(uint256 indexed tokenId, address indexed minter, uint64 seed, uint8 spiralType, uint8 numArms)"
+            "event SpiralMinted(uint256 indexed tokenId, address indexed minter, uint64 seed, uint8 spiralType, uint8 numArms)",
+            "event GalaxyInitialized(uint256 indexed tokenId, uint16 expectedTriangles, uint8 galaxyType)",
+            "event TriangleBatchAdded(uint256 indexed tokenId, uint256 batchNumber, uint256 trianglesAdded, bool isComplete)"
         ];
         
         let provider;
@@ -546,7 +558,7 @@
             }
             
             const seed = parseInt(document.getElementById('seed').value);
-            const canvasSize = parseInt(document.getElementById('canvasSize').value);
+            const canvasSize = 420; // Hardcoded to 420x420 for Background trait
             const triangleStyle = document.getElementById('triangleStyle').value;
             const colorMode = document.getElementById('colorMode').value;
             
@@ -600,26 +612,27 @@
             }
         }
         
-        // Estimate gas using Hardhat + live gas prices
-        async function estimateGas() {
-            console.log('estimateGas called');
-            console.log('signer exists:', !!signer);
-            console.log('contract exists:', !!contract);
-            console.log('currentSpiralData exists:', !!currentSpiralData);
-            
-            if (!signer || !contract) {
-                console.log('Missing signer or contract');
-                alert('Please connect your wallet first!');
-                return;
-            }
-            
-            if (!currentSpiralData) {
-                console.log('Missing spiral data');
-                alert('Please generate a spiral first!');
-                return;
-            }
-            
-            try {
+            // Estimate gas using Hardhat + live gas prices
+            async function estimateGas() {
+                console.log('=== Gas Estimation Debug ===');
+                console.log('Contract exists:', !!contract);
+                console.log('Current spiral data exists:', !!currentSpiralData);
+                
+                if (!signer || !contract) {
+                    alert('Please connect your wallet first!');
+                    return;
+                }
+                
+                if (!currentSpiralData) {
+                    alert('Please generate a spiral first!');
+                    return;
+                }
+                
+                try {
+                    // Log triangle count for gas analysis
+                    const triangleCount = currentSpiralData.triangles.length;
+                    console.log(`Triangle count: ${triangleCount}`);
+                    console.log(`Estimated data size: ~${triangleCount * 10 * 32} bytes`);
                 // Prepare transaction data
                 const config = {
                     seed: currentSpiralData.seed,
@@ -640,7 +653,9 @@
                     x3: t.vertices[2][0],
                     y3: t.vertices[2][1],
                     armIndex: t.arm_index,
-                    triangleIndex: t.triangle_index
+                    triangleIndex: t.triangle_index,
+                    triangleType: t.triangle_type || 0,
+                    opacity: 80,
                 }));
                 
                 console.log(`Using ${triangles.length} triangles for gas estimation`);
@@ -688,6 +703,8 @@
                 const totalCostWei = gasEstimate.mul(gasPriceWei);
                 const totalCostEth = ethers.utils.formatEther(totalCostWei);
                 const totalCostUsd = parseFloat(totalCostEth) * ethPriceUsd;
+                console.log(`Gas estimate: ${gasEstimate.toString()}`);
+                console.log(`Gas limit percentage: ${(parseInt(gasEstimate) / 30000000 * 100).toFixed(2)}% of block limit`);
                 
                 // Display results
                 displayRealGasCosts({
@@ -754,7 +771,9 @@
                     x3: t.vertices[2][0],
                     y3: t.vertices[2][1],
                     armIndex: t.arm_index,
-                    triangleIndex: t.triangle_index
+                    triangleIndex: t.triangle_index,
+                    triangleType: t.triangle_type || 0,
+                    opacity: 80
                 }));
                 
                 console.log(`Minting NFT with ${triangles.length} triangles`);

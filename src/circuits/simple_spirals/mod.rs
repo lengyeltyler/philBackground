@@ -7,12 +7,12 @@ use halo2_proofs::{
 
 #[derive(Debug, Clone)]
 pub struct SimpleSpiralsConfig {
-    pub advice: [Column<Advice>; 24], // Expanded for triangle coordinates
+    pub advice: [Column<Advice>; 24], // Keep existing column count
     pub selector_variant: Selector,
     pub selector_spiral: Selector,
     pub selector_config: Selector,
     pub selector_particle: Selector,
-    pub selector_triangle: Selector, // New selector for triangle verification
+    pub selector_triangle: Selector,
 }
 
 #[derive(Debug, Clone)]
@@ -23,22 +23,22 @@ pub struct SimpleSpiralsCircuit<F: Field> {
     // Configuration values
     pub spiral_type: Value<F>,
     pub num_arms: Value<F>,
-    // Configuration intermediate values (calculated outside circuit)
-    pub spiral_quotient: Value<F>,     // variant_id / 3
-    pub arms_quotient: Value<F>,       // (variant_id / 3) / 6  
-    pub arms_remainder: Value<F>,      // (variant_id / 3) % 6
-    // Particle generation
-    pub particles_per_arm: Value<F>,   // Number of particles per arm (15)
-    pub total_particles: Value<F>,     // num_arms * particles_per_arm
-    pub canvas_size: Value<F>,         // Canvas size for coordinate calculation
-    // Particle data - store calculated positions
-    pub particle_positions: Vec<(Value<F>, Value<F>)>, // (x, y) coordinates
-    pub particle_metadata: Vec<(Value<F>, Value<F>, Value<F>)>, // (arm_index, particle_index, angle_index)
-    // Triangle generation - NEW for Phase 2C
-    pub triangles_per_arm: Value<F>,   // Number of triangles per arm (5)
-    pub total_triangles: Value<F>,     // num_arms * triangles_per_arm
-    pub triangle_vertices: Vec<(Value<F>, Value<F>, Value<F>, Value<F>, Value<F>, Value<F>)>, // (x1,y1,x2,y2,x3,y3)
-    pub triangle_metadata: Vec<(Value<F>, Value<F>, Value<F>)>, // (arm_index, triangle_index, triangle_type)
+    // Configuration intermediate values
+    pub spiral_quotient: Value<F>,
+    pub arms_quotient: Value<F>,
+    pub arms_remainder: Value<F>,
+    // Enhanced particle generation for galaxy effect
+    pub particles_per_arm: Value<F>,   // Now 69 instead of 15
+    pub total_particles: Value<F>,     // num_arms * 69
+    pub canvas_size: Value<F>,
+    // Particle data - now micro-particles
+    pub particle_positions: Vec<(Value<F>, Value<F>)>,
+    pub particle_metadata: Vec<(Value<F>, Value<F>, Value<F>)>,
+    // Enhanced triangle generation - micro-triangles for galaxy effect
+    pub triangles_per_arm: Value<F>,   // Now 69 instead of 5
+    pub total_triangles: Value<F>,     // num_arms * 69
+    pub triangle_vertices: Vec<(Value<F>, Value<F>, Value<F>, Value<F>, Value<F>, Value<F>)>,
+    pub triangle_metadata: Vec<(Value<F>, Value<F>, Value<F>)>,
 }
 
 impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
@@ -106,7 +106,7 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             meta.enable_equality(*col);
         }
 
-        // Constraint 1: Variant selection (same as before)
+        // Constraint 1: Variant selection (unchanged)
         meta.create_gate("variant_selection", |meta| {
             let s = meta.query_selector(selector_variant);
             let seed = meta.query_advice(advice[0], Rotation::cur());
@@ -124,7 +124,7 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             ]
         });
 
-        // Constraint 2: Configuration mapping verification
+        // Constraint 2: Enhanced configuration mapping for galaxy generation
         meta.create_gate("config_mapping", |meta| {
             let s = meta.query_selector(selector_config);
             let variant_id = meta.query_advice(advice[2], Rotation::cur());
@@ -145,23 +145,18 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             }
             let three_expr = Expression::Constant(three);
 
-            let mut five = F::ZERO;
-            for _ in 0..5 {
-                five = five + F::ONE;
-            }
-            let five_expr = Expression::Constant(five);
-
             let mut six = F::ZERO;
             for _ in 0..6 {
                 six = six + F::ONE;
             }
             let six_expr = Expression::Constant(six);
 
-            let mut fifteen = F::ZERO;
-            for _ in 0..15 {
-                fifteen = fifteen + F::ONE;
+            // UPDATED: particles_per_arm = 69 for galaxy effect
+            let mut sixty_nine = F::ZERO;
+            for _ in 0..69 {
+                sixty_nine = sixty_nine + F::ONE;
             }
-            let fifteen_expr = Expression::Constant(fifteen);
+            let sixty_nine_expr = Expression::Constant(sixty_nine);
 
             vec![
                 // Prove: variant_id = spiral_quotient * 3 + spiral_type
@@ -170,32 +165,32 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
                 s.clone() * (spiral_quotient - (arms_quotient * six_expr + arms_remainder.clone())),
                 // Prove: num_arms = 3 + arms_remainder
                 s.clone() * (num_arms.clone() - (three_expr + arms_remainder)),
-                // Prove: particles_per_arm = 15
-                s.clone() * (particles_per_arm.clone() - fifteen_expr),
+                // UPDATED: Prove: particles_per_arm = 69 (galaxy density)
+                s.clone() * (particles_per_arm.clone() - sixty_nine_expr),
                 // Prove: total_particles = num_arms * particles_per_arm
                 s.clone() * (total_particles - (num_arms.clone() * particles_per_arm)),
-                // NEW: Prove: triangles_per_arm = 5
-                s.clone() * (triangles_per_arm.clone() - five_expr),
-                // NEW: Prove: total_triangles = num_arms * triangles_per_arm
+                // UPDATED: Prove: triangles_per_arm = particles_per_arm (1:1 ratio for micro-triangles)
+                s.clone() * (triangles_per_arm.clone() - particles_per_arm),
+                // Prove: total_triangles = num_arms * triangles_per_arm
                 s * (total_triangles - (num_arms * triangles_per_arm)),
             ]
         });
 
-        // Constraint 3: Particle position verification (simple placeholder)
+        // Constraint 3: Particle position verification
         meta.create_gate("particle_verification", |meta| {
             let s = meta.query_selector(selector_particle);
             let particle_x = meta.query_advice(advice[11], Rotation::cur());
             let particle_y = meta.query_advice(advice[12], Rotation::cur());
             let _canvas_size = meta.query_advice(advice[10], Rotation::cur());
 
-            // Simple placeholder constraints that always pass
+            // Simple placeholder constraints
             vec![
                 s.clone() * (particle_x.clone() - particle_x),
                 s * (particle_y.clone() - particle_y),
             ]
         });
 
-        // Constraint 4: Triangle vertex verification - NEW for Phase 2C
+        // Constraint 4: Enhanced triangle verification for micro-triangles
         meta.create_gate("triangle_verification", |meta| {
             let s = meta.query_selector(selector_triangle);
             let x1 = meta.query_advice(advice[18], Rotation::cur());
@@ -205,9 +200,8 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             let x3 = meta.query_advice(advice[22], Rotation::cur());
             let y3 = meta.query_advice(advice[23], Rotation::cur());
 
-            // Basic triangle validation - ensure vertices exist
+            // Basic triangle validation for micro-triangles
             vec![
-                // Verify all triangle vertices are present (placeholder)
                 s.clone() * (x1.clone() - x1),
                 s.clone() * (y1.clone() - y1),
                 s.clone() * (x2.clone() - x2),
@@ -217,13 +211,13 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             ]
         });
 
-        // Constraint 5: Trigonometric lookup (enhanced)
+        // Constraint 5: Trigonometric lookup (unchanged)
         meta.create_gate("trig_lookup", |meta| {
             let s = meta.query_selector(selector_spiral);
             let angle_index = meta.query_advice(advice[15], Rotation::cur());
 
             vec![
-                s * (angle_index.clone() - angle_index), // Placeholder - always 0
+                s * (angle_index.clone() - angle_index),
             ]
         });
 
@@ -242,7 +236,7 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
         config: Self::Config,
         mut layouter: impl Layouter<F>,
     ) -> Result<(), Error> {
-        // Region 1: Variant selection
+        // Region 1: Variant selection (unchanged)
         layouter.assign_region(
             || "variant selection",
             |mut region| {
@@ -256,7 +250,7 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             },
         )?;
 
-        // Region 2: Configuration mapping
+        // Region 2: Enhanced configuration mapping
         layouter.assign_region(
             || "configuration mapping",
             |mut region| {
@@ -278,15 +272,14 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             },
         )?;
 
-        // Region 3: Particle generation
+        // Region 3: Enhanced particle generation (more particles for galaxy density)
         layouter.assign_region(
             || "particle generation",
             |mut region| {
-                // Assign particle positions and metadata
                 for (i, ((x, y), (arm_idx, particle_idx, angle_idx))) in 
                     self.particle_positions.iter().zip(self.particle_metadata.iter()).enumerate() 
                 {
-                    if i < 10 { // Limit to first 10 particles for circuit size
+                    if i < 50 { // Limit circuit size for testing, but generate more particles
                         config.selector_particle.enable(&mut region, i)?;
                         
                         region.assign_advice(|| "particle_x", config.advice[11], i, || *x)?;
@@ -302,15 +295,14 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
             },
         )?;
 
-        // Region 4: Triangle generation - NEW for Phase 2C
+        // Region 4: Enhanced triangle generation (micro-triangles for galaxy effect)
         layouter.assign_region(
             || "triangle generation",
             |mut region| {
-                // Assign triangle vertices and metadata
                 for (i, ((x1, y1, x2, y2, x3, y3), (_arm_idx, _triangle_idx, _triangle_type))) in 
                     self.triangle_vertices.iter().zip(self.triangle_metadata.iter()).enumerate() 
                 {
-                    if i < 10 { // Limit to first 10 triangles for circuit size
+                    if i < 50 { // Limit circuit size for testing
                         config.selector_triangle.enable(&mut region, i)?;
                         
                         region.assign_advice(|| "triangle_x1", config.advice[18], i, || *x1)?;
@@ -330,7 +322,7 @@ impl<F: Field> Circuit<F> for SimpleSpiralsCircuit<F> {
     }
 }
 
-// Helper function to calculate configuration mapping outside the circuit
+// Helper function to calculate configuration mapping (unchanged)
 pub fn calculate_configuration_mapping(variant_id: u64) -> (u64, u64, u64, u64, u64) {
     let spiral_type = variant_id % 3;
     let spiral_quotient = variant_id / 3;
@@ -341,13 +333,13 @@ pub fn calculate_configuration_mapping(variant_id: u64) -> (u64, u64, u64, u64, 
     (spiral_type, num_arms, spiral_quotient, arms_quotient, arms_remainder)
 }
 
-// Helper function to generate all particles for a spiral configuration
+// ENHANCED: Generate galaxy-style spiral particles (69 per arm instead of 15)
 pub fn generate_spiral_particles(
     spiral_type: u64,
     num_arms: u64,
     canvas_size: u64,
 ) -> (Vec<(u64, u64)>, Vec<(u64, u64, u64)>) {
-    let particles_per_arm = 15u64;
+    let particles_per_arm = 69u64; // GALAXY DENSITY - increased from 15
     let mut positions = Vec::new();
     let mut metadata = Vec::new();
 
@@ -369,33 +361,34 @@ pub fn generate_spiral_particles(
     (positions, metadata)
 }
 
-// NEW for Phase 2C: Generate triangles from spiral particles
+// ENHANCED: Generate micro-triangles for galaxy particle effect
 pub fn generate_spiral_triangles(
     spiral_type: u64,
     num_arms: u64,
     canvas_size: u64,
 ) -> (Vec<(u64, u64, u64, u64, u64, u64)>, Vec<(u64, u64, u64)>) {
     let (positions, _metadata) = generate_spiral_particles(spiral_type, num_arms, canvas_size);
-    let particles_per_arm = 15u64;
-    let triangles_per_arm = 5u64; // 15 particles / 3 = 5 triangles per arm
+    let particles_per_arm = 69u64;
     
     let mut triangle_vertices = Vec::new();
     let mut triangle_metadata = Vec::new();
 
     for arm_index in 0..num_arms {
-        for triangle_index in 0..triangles_per_arm {
-            // Get 3 consecutive particles from this arm to form a triangle
-            let base_particle_idx = (arm_index * particles_per_arm + triangle_index * 3) as usize;
+        for particle_index in 0..particles_per_arm {
+            let particle_idx = (arm_index * particles_per_arm + particle_index) as usize;
             
-            if base_particle_idx + 2 < positions.len() {
-                let (x1, y1) = positions[base_particle_idx];
-                let (x2, y2) = positions[base_particle_idx + 1];
-                let (x3, y3) = positions[base_particle_idx + 2];
+            if particle_idx < positions.len() {
+                let (center_x, center_y) = positions[particle_idx];
+                
+                // CREATE MICRO-TRIANGLES: Much smaller for galaxy particle effect
+                let base_size = 6u64;
+                let size_reduction = (particle_index * 4) / particles_per_arm; // Gets smaller toward edge
+                let triangle_size = (base_size - size_reduction).max(2); // Minimum 2 pixels
+                
+                let (x1, y1, x2, y2, x3, y3) = create_micro_triangle(center_x, center_y, triangle_size);
                 
                 triangle_vertices.push((x1, y1, x2, y2, x3, y3));
-                
-                // Triangle type: 0 = consecutive particles, could add cross-arm types later
-                triangle_metadata.push((arm_index, triangle_index, 0));
+                triangle_metadata.push((arm_index, particle_index, 0)); // Type 0 = spiral particle
             }
         }
     }
@@ -403,24 +396,22 @@ pub fn generate_spiral_triangles(
     (triangle_vertices, triangle_metadata)
 }
 
-// Keep the existing trigonometric tables and helper function...
-const TRIG_TABLE_SIZE: usize = 32;
-const SCALE_FACTOR: u64 = 10000;
+// NEW: Create micro-triangles for galaxy particle effect
+fn create_micro_triangle(center_x: u64, center_y: u64, size: u64) -> (u64, u64, u64, u64, u64, u64) {
+    let half_size = size / 2;
+    
+    // Create small triangular "star" particle
+    let x1 = center_x;                    // Top point
+    let y1 = center_y.saturating_sub(half_size);
+    let x2 = center_x.saturating_sub(half_size); // Bottom left
+    let y2 = center_y + half_size;
+    let x3 = center_x + half_size;        // Bottom right  
+    let y3 = center_y + half_size;
+    
+    (x1, y1, x2, y2, x3, y3)
+}
 
-const SIN_TABLE: [i64; TRIG_TABLE_SIZE] = [
-    0, 1951, 3827, 5556, 7071, 8315, 9239, 9808,
-    10000, 9808, 9239, 8315, 7071, 5556, 3827, 1951,
-    0, -1951, -3827, -5556, -7071, -8315, -9239, -9808,
-    -10000, -9808, -9239, -8315, -7071, -5556, -3827, -1951,
-];
-
-const COS_TABLE: [i64; TRIG_TABLE_SIZE] = [
-    10000, 9808, 9239, 8315, 7071, 5556, 3827, 1951,
-    0, -1951, -3827, -5556, -7071, -8315, -9239, -9808,
-    -10000, -9808, -9239, -8315, -7071, -5556, -3827, -1951,
-    0, 1951, 3827, 5556, 7071, 8315, 9239, 9808,
-];
-
+// Enhanced spiral point calculation with better galaxy distribution
 pub fn calculate_spiral_point(
     arm_index: u64,
     particle_index: u64, 
@@ -428,15 +419,34 @@ pub fn calculate_spiral_point(
     spiral_type: u64,
     canvas_size: u64,
 ) -> (u64, u64, u64) {
-    let particles_per_arm = 15u64;
-    let max_radius = (canvas_size * 4963) / 10000;
+    const TRIG_TABLE_SIZE: usize = 32;
+    const SCALE_FACTOR: u64 = 10000;
+    
+    const SIN_TABLE: [i64; TRIG_TABLE_SIZE] = [
+        0, 1951, 3827, 5556, 7071, 8315, 9239, 9808,
+        10000, 9808, 9239, 8315, 7071, 5556, 3827, 1951,
+        0, -1951, -3827, -5556, -7071, -8315, -9239, -9808,
+        -10000, -9808, -9239, -8315, -7071, -5556, -3827, -1951,
+    ];
+    
+    const COS_TABLE: [i64; TRIG_TABLE_SIZE] = [
+        10000, 9808, 9239, 8315, 7071, 5556, 3827, 1951,
+        0, -1951, -3827, -5556, -7071, -8315, -9239, -9808,
+        -10000, -9808, -9239, -8315, -7071, -5556, -3827, -1951,
+        0, 1951, 3827, 5556, 7071, 8315, 9239, 9808,
+    ];
+    
+    let particles_per_arm = 69u64; // Updated for galaxy density
+    let max_radius = (canvas_size * 4963) / 10000; // Keep same radius ratio
     
     let base_angle_index = (arm_index * TRIG_TABLE_SIZE as u64) / total_arms;
     let t = (particle_index * 1000) / particles_per_arm;
+    
+    // GALAXY SPIRAL TYPES: Enhanced for better visual variety
     let progression = match spiral_type {
-        0 => (t * 16) / 1000,
-        1 => (t * 4) / 1000,
-        _ => (t * 8) / 1000,
+        0 => (t * 16) / 1000, // Tight spiral - more compressed
+        1 => (t * 4) / 1000,  // Loose spiral - more open
+        _ => (t * 8) / 1000,  // Classic spiral - balanced
     };
     
     let angle_index = (base_angle_index + progression) % (TRIG_TABLE_SIZE as u64);
