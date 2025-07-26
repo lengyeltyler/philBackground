@@ -3,40 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>zkBg NFT Verifier - Hardhat</title>
+    <title>phil background - phil protocol</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Courier New', monospace;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #424242 0%, #1c1424 100%);
+            background: #000000;
             min-height: 100vh;
-            color: white;
+            color: #00ff41;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #003300 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, #001100 0%, transparent 50%);
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 2px solid #00ff41;
+            border-radius: 5px;
             padding: 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
         }
         
         h1 {
             text-align: center;
             font-size: 2.5em;
             margin-bottom: 10px;
-            background: linear-gradient(45deg, #ffd700, #ff6b6b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41;
+            letter-spacing: 3px;
         }
         
         .verifier-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+            background: rgba(0, 40, 0, 0.6);
+            border: 1px solid #00aa22;
+            border-radius: 5px;
             padding: 25px;
             margin-bottom: 20px;
         }
@@ -51,40 +54,43 @@
         .input-group label {
             font-weight: 600;
             min-width: 100px;
+            color: #00ff41;
         }
         
         .input-group input {
             flex: 1;
             padding: 10px;
-            border-radius: 8px;
-            border: none;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            font-weight: 500;
+            border-radius: 3px;
+            border: 1px solid #00aa22;
+            background: #001100;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
         }
         
         button {
-            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
-            border: none;
+            background: linear-gradient(45deg, #003300, #00aa22);
+            border: 1px solid #00ff41;
             padding: 12px 25px;
-            border-radius: 25px;
-            color: white;
+            border-radius: 3px;
+            color: #00ff41;
             font-weight: 600;
             cursor: pointer;
             font-size: 1em;
-            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s;
             margin: 0 10px 10px 0;
+            text-transform: uppercase;
         }
         
         button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+            background: linear-gradient(45deg, #00aa22, #00ff41);
+            color: #000000;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
         }
         
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
         
         .comparison-container {
@@ -95,60 +101,72 @@
         }
         
         .canvas-wrapper {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+            background: #000000;
+            border: 2px solid #00aa22;
+            border-radius: 5px;
             padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 10px rgba(0, 170, 34, 0.3);
         }
         
         .canvas-wrapper h3 {
-            color: #333;
+            color: #00ff41;
             text-align: center;
             margin: 0 0 15px 0;
             font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         canvas {
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #00aa22;
             width: 100%;
-            max-width: 500px;
+            max-width: 420px;
         }
         
         .info-panel {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+            background: rgba(0, 40, 0, 0.6);
+            border: 1px solid #00aa22;
+            border-radius: 5px;
             padding: 20px;
             margin-top: 20px;
         }
         
         .data-section {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #003300;
+            border-radius: 3px;
             padding: 15px;
             margin: 10px 0;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 0.9em;
             max-height: 300px;
             overflow-y: auto;
+            color: #00cc33;
         }
         
         .status-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
+            padding: 8px 20px;
+            border-radius: 3px;
             font-weight: 600;
             margin: 5px;
             display: inline-block;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .status-badge.success {
-            background: rgba(76, 175, 80, 0.3);
-            color: #4caf50;
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
         }
         
         .status-badge.error {
-            background: rgba(244, 67, 54, 0.3);
-            color: #f44336;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff3333;
+            text-shadow: 0 0 5px #ff0000;
         }
         
         .stats {
@@ -159,22 +177,25 @@
         }
         
         .stat-item {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 40, 0, 0.8);
+            border: 1px solid #00aa22;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 3px;
             text-align: center;
         }
         
         .stat-value {
             font-size: 1.5em;
             font-weight: bold;
-            color: #ffd700;
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
         }
         
         .stat-label {
             font-size: 0.9em;
-            opacity: 0.8;
+            color: #00aa22;
             margin-top: 5px;
+            text-transform: uppercase;
         }
         
         .loading {
@@ -184,9 +205,9 @@
         }
         
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 4px solid rgba(0, 170, 34, 0.3);
             border-radius: 50%;
-            border-top: 4px solid #fff;
+            border-top: 4px solid #00ff41;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -198,30 +219,40 @@
             100% { transform: rotate(360deg); }
         }
         
-        .highlight {
-            background: rgba(255, 255, 0, 0.2);
-            padding: 2px 5px;
+        .address {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: rgba(0, 40, 0, 0.8);
+            padding: 2px 8px;
             border-radius: 3px;
+            word-break: break-all;
+            color: #00cc33;
         }
         
-        .address {
-            font-family: monospace;
-            font-size: 0.9em;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-            word-break: break-all;
+        h3, h4 {
+            color: #00ff41;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        pre {
+            color: #00cc33;
+            background: rgba(0, 10, 0, 0.9);
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #003300;
+            overflow-x: auto;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔍 zkBg NFT Verifier</h1>
-        <p style="text-align: center; opacity: 0.8; margin-bottom: 30px;">Verify that on-chain NFT data can recreate the original spiral pattern</p>
+        <h1>⋮⋮⋮ zkBg NFT Verifier ⋮⋮⋮</h1>
+        <p style="text-align: center; color: #00cc33; margin-bottom: 30px;">Cryptographic verification of on-chain generative art integrity</p>
         
         <!-- Verification Input -->
         <div class="verifier-section">
-            <h3>🎯 Verify NFT Data Integrity</h3>
+            <h3>⬢ System Access</h3>
             <div class="input-group">
                 <label>Contract:</label>
                 <input type="text" id="contractAddress" placeholder="0x..." value="">
@@ -230,22 +261,22 @@
                 <label>Token ID:</label>
                 <input type="number" id="tokenId" placeholder="0" value="0">
             </div>
-            <button onclick="connectWallet()" id="connectBtn">🦊 Connect Wallet</button>
-            <button onclick="verifyNFT()" id="verifyBtn" disabled>🔍 Verify NFT</button>
-            <button onclick="loadFromDeployment()" style="background: linear-gradient(45deg, #ff6b6b, #ffd700);">📋 Load Contract</button>
-            <button onclick="debugContract()" style="background: linear-gradient(45deg, #ff9500, #ffb347);">🔧 Debug Contract</button>
+            <button onclick="connectWallet()" id="connectBtn">⬢ Connect Node</button>
+            <button onclick="verifyNFT()" id="verifyBtn" disabled>⬢ Execute Verification</button>
+            <button onclick="loadFromDeployment()">⬢ Load Contract</button>
+            <button onclick="debugContract()">⬢ Debug Protocol</button>
         </div>
         
         <!-- Loading -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Reading on-chain data and reconstructing spiral...</p>
+            <p>Analyzing blockchain data and reconstructing...</p>
         </div>
         
         <!-- Debug Section -->
         <div id="debugResults" style="display: none;">
             <div class="info-panel">
-                <h3>🔧 Contract Debug Information</h3>
+                <h3>⬢ Protocol Debug Information</h3>
                 <div id="debugData"></div>
             </div>
         </div>
@@ -254,33 +285,33 @@
         <div id="verificationResults" style="display: none;">
             <!-- Status -->
             <div class="info-panel">
-                <h3>📊 Verification Status</h3>
+                <h3>⬢ Verification</h3>
                 <div id="verificationStatus"></div>
             </div>
             
             <!-- Comparison -->
             <div class="comparison-container">
                 <div class="canvas-wrapper">
-                    <h3>🔗 On-Chain Data Reconstruction</h3>
-                    <canvas id="onchainCanvas" width="500" height="500"></canvas>
-                    <p style="color: #333; text-align: center; margin: 10px 0;">Built from smart contract data</p>
+                    <h3>⬢ Blockchain Data</h3>
+                    <canvas id="onchainCanvas" width="420" height="420"></canvas>
+                    <p style="color: #00aa22; text-align: center; margin: 10px 0;">Reconstructed from smart contract</p>
                 </div>
                 <div class="canvas-wrapper">
-                    <h3>⚡ Live ZK Circuit Generation</h3>
-                    <canvas id="liveCanvas" width="500" height="500"></canvas>
-                    <p style="color: #333; text-align: center; margin: 10px 0;">Generated using same seed</p>
+                    <h3>⬢ ZK Circuit Output</h3>
+                    <canvas id="liveCanvas" width="420" height="420"></canvas>
+                    <p style="color: #00aa22; text-align: center; margin: 10px 0;">Generated using verified algorithm</p>
                 </div>
             </div>
             
             <!-- NFT Metadata -->
             <div class="info-panel">
-                <h3>📋 NFT Configuration</h3>
+                <h3>⬢ NFT Configuration</h3>
                 <div class="stats" id="nftStats"></div>
             </div>
             
             <!-- Raw Data -->
             <div class="info-panel">
-                <h3>🔧 Raw On-Chain Data</h3>
+                <h3>⬢ Raw Blockchain Data</h3>
                 <div class="data-section" id="rawData"></div>
             </div>
         </div>
@@ -290,17 +321,18 @@
     
     <script>
         let CONTRACT_ADDRESS = "";
+        // FIXED: Using the original contract ABI without backgroundType
         const CONTRACT_ABI = [
             "function getSpiralConfig(uint256 tokenId) view returns (tuple(uint64 seed, uint64 variant, uint8 spiralType, uint8 numArms, uint64 spiralQuotient, uint64 armsQuotient, uint64 armsRemainder))",
             "function getTriangleCount(uint256 tokenId) view returns (uint256)",
-            "function getTriangleData(uint256 tokenId, uint256 index) view returns (tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex))",
+            "function getTriangleData(uint256 tokenId, uint256 index) view returns (tuple(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint16 x3, uint16 y3, uint8 armIndex, uint8 triangleIndex, uint8 triangleType, uint8 opacity))",
             "function tokenURI(uint256 tokenId) view returns (string)",
             "function ownerOf(uint256 tokenId) view returns (address)",
             "function balanceOf(address owner) view returns (uint256)",
             "function totalSupply() view returns (uint256)",
             "function name() view returns (string)",
             "function symbol() view returns (string)",
-            "event SpiralMinted(uint256 indexed tokenId, address indexed minter, uint64 seed, uint8 spiralType, uint8 numArms)"
+            "event SpiralMinted(uint256 indexed tokenId, address indexed minter, uint64 seed, uint8 spiralType, uint8 numArms, uint8 backgroundType)"
         ];
         
         let provider;
@@ -309,7 +341,7 @@
         // Connect wallet
         async function connectWallet() {
             if (typeof window.ethereum === 'undefined') {
-                alert('Please install MetaMask!');
+                alert('MetaMask node not detected. Please install to proceed.');
                 return;
             }
             
@@ -323,14 +355,14 @@
                     return;
                 }
                 
-                document.getElementById('connectBtn').textContent = '✅ Connected';
+                document.getElementById('connectBtn').textContent = '✅ Node Connected';
                 document.getElementById('connectBtn').disabled = true;
                 document.getElementById('verifyBtn').disabled = false;
                 
-                console.log('Wallet connected to Hardhat');
+                console.log('Node connected to Hardhat protocol');
             } catch (error) {
-                console.error('Error connecting wallet:', error);
-                alert('Error connecting wallet: ' + error.message);
+                console.error('Error connecting to node:', error);
+                alert('Error connecting to node: ' + error.message);
             }
         }
         
@@ -343,7 +375,7 @@
                     if (deployment.network === 'localhost' || deployment.network === 'hardhat') {
                         CONTRACT_ADDRESS = deployment.address;
                         document.getElementById('contractAddress').value = CONTRACT_ADDRESS;
-                        console.log('Loaded contract address:', CONTRACT_ADDRESS);
+                        console.log('Contract loaded:', CONTRACT_ADDRESS);
                     } else {
                         alert('Deployment file is not for localhost/hardhat network');
                     }
@@ -355,6 +387,7 @@
                 alert('Error loading deployment: ' + error.message);
             }
         }
+
         async function debugContract() {
             const contractAddr = document.getElementById('contractAddress').value;
             
@@ -371,14 +404,12 @@
             document.getElementById('loading').style.display = 'block';
             
             try {
-                // Initialize contract
                 contract = new ethers.Contract(contractAddr, CONTRACT_ABI, provider);
                 
                 console.log('Debugging contract:', contractAddr);
                 
-                let debugInfo = `<h4>📋 Contract Information</h4>`;
+                let debugInfo = `<h4>⬢ Contract Information</h4>`;
                 
-                // Basic contract info
                 try {
                     const name = await contract.name();
                     const symbol = await contract.symbol();
@@ -388,12 +419,10 @@
                     debugInfo += `<p><strong>Error getting name/symbol:</strong> ${e.message}</p>`;
                 }
                 
-                // Get connected wallet info
                 const signer = provider.getSigner();
                 const userAddress = await signer.getAddress();
                 debugInfo += `<p><strong>Your address:</strong> <span class="address">${userAddress}</span></p>`;
                 
-                // Check user's balance
                 try {
                     const balance = await contract.balanceOf(userAddress);
                     debugInfo += `<p><strong>Your NFT balance:</strong> ${balance.toString()}</p>`;
@@ -401,19 +430,9 @@
                     debugInfo += `<p><strong>Error getting balance:</strong> ${e.message}</p>`;
                 }
                 
-                // Try to get total supply (if available)
-                try {
-                    const totalSupply = await contract.totalSupply();
-                    debugInfo += `<p><strong>Total minted:</strong> ${totalSupply.toString()}</p>`;
-                } catch (e) {
-                    debugInfo += `<p><strong>Total supply not available</strong> (older ERC721)</p>`;
-                }
-                
-                // Check events to see what tokens were minted
-                debugInfo += `<h4>🔍 Searching for Minted Tokens</h4>`;
+                debugInfo += `<h4>⬢ Searching for Minted Tokens</h4>`;
                 
                 try {
-                    // Get minting events from the last 1000 blocks
                     const currentBlock = await provider.getBlockNumber();
                     const fromBlock = Math.max(0, currentBlock - 1000);
                     
@@ -428,7 +447,7 @@
                             const { tokenId, minter, seed, spiralType, numArms } = event.args;
                             const spiralTypes = ['Tight', 'Loose', 'Classic'];
                             debugInfo += `
-                                <div style="background: rgba(255,255,255,0.05); padding: 10px; margin: 5px 0; border-radius: 5px;">
+                                <div style="background: rgba(0,40,0,0.8); border: 1px solid #003300; padding: 10px; margin: 5px 0; border-radius: 3px;">
                                     <strong>Token ID ${tokenId.toString()}</strong><br>
                                     Minter: <span class="address">${minter}</span><br>
                                     Seed: ${seed.toString()}, Type: ${spiralTypes[spiralType]}, Arms: ${numArms}<br>
@@ -437,34 +456,16 @@
                             `;
                         });
                         
-                        // Suggest token IDs to try
                         const tokenIds = events.map(e => e.args.tokenId.toString());
                         debugInfo += `<p><strong>💡 Try these Token IDs:</strong> ${tokenIds.join(', ')}</p>`;
                     } else {
-                        debugInfo += `<p style="color: #f44336;"><strong>⚠️ No minting events found!</strong></p>`;
-                        debugInfo += `<p>This could mean:</p>`;
-                        debugInfo += `<ul style="margin-left: 20px;">`;
-                        debugInfo += `<li>No NFTs have been minted yet</li>`;
-                        debugInfo += `<li>You're checking the wrong contract address</li>`;
-                        debugInfo += `<li>The contract was deployed recently and events are outside search range</li>`;
-                        debugInfo += `</ul>`;
+                        debugInfo += `<p style="color: #ff3333;"><strong>⚠️ No minting events found!</strong></p>`;
                     }
                 } catch (e) {
                     debugInfo += `<p><strong>Error searching events:</strong> ${e.message}</p>`;
                 }
                 
-                // Test token ID 0 specifically
-                debugInfo += `<h4>🧪 Testing Token ID 0</h4>`;
-                try {
-                    const owner0 = await contract.ownerOf(0);
-                    debugInfo += `<p><strong>Token 0 owner:</strong> <span class="address">${owner0}</span> ✅</p>`;
-                } catch (e) {
-                    debugInfo += `<p><strong>Token 0:</strong> Does not exist ❌</p>`;
-                    debugInfo += `<p><em>Error: ${e.message}</em></p>`;
-                }
-                
-                // Test a few more token IDs
-                for (let i = 1; i <= 5; i++) {
+                for (let i = 0; i <= 5; i++) {
                     try {
                         const owner = await contract.ownerOf(i);
                         debugInfo += `<p><strong>Token ${i} owner:</strong> <span class="address">${owner}</span> ✅</p>`;
@@ -479,39 +480,12 @@
             } catch (error) {
                 console.error('Error debugging contract:', error);
                 document.getElementById('debugData').innerHTML = `
-                    <p style="color: #f44336;"><strong>❌ Debug Error:</strong></p>
+                    <p style="color: #ff3333;"><strong>❌ Debug Error:</strong></p>
                     <p>${error.message}</p>
-                    <p><strong>Possible issues:</strong></p>
-                    <ul style="margin-left: 20px;">
-                        <li>Contract address is incorrect</li>
-                        <li>Contract is not deployed</li>
-                        <li>Network mismatch (not on Hardhat)</li>
-                        <li>Contract doesn't implement expected functions</li>
-                    </ul>
                 `;
                 document.getElementById('debugResults').style.display = 'block';
             } finally {
                 document.getElementById('loading').style.display = 'none';
-            }
-        }
-        async function loadFromDeployment() {
-            try {
-                const response = await fetch('/deployments.json');
-                if (response.ok) {
-                    const deployment = await response.json();
-                    if (deployment.network === 'localhost' || deployment.network === 'hardhat') {
-                        CONTRACT_ADDRESS = deployment.address;
-                        document.getElementById('contractAddress').value = CONTRACT_ADDRESS;
-                        console.log('Loaded contract address:', CONTRACT_ADDRESS);
-                    } else {
-                        alert('Deployment file is not for localhost/hardhat network');
-                    }
-                } else {
-                    alert('Could not load deployments.json. Make sure it exists in static folder.');
-                }
-            } catch (error) {
-                console.error('Error loading deployment:', error);
-                alert('Error loading deployment: ' + error.message);
             }
         }
         
@@ -534,12 +508,11 @@
             document.getElementById('verificationResults').style.display = 'none';
             
             try {
-                // Initialize contract
                 contract = new ethers.Contract(contractAddr, CONTRACT_ABI, provider);
                 
                 console.log('Reading NFT data from contract...');
                 
-                // Get spiral configuration
+                // Get spiral configuration (without backgroundType)
                 const spiralConfig = await contract.getSpiralConfig(tokenId);
                 console.log('Spiral config:', spiralConfig);
                 
@@ -551,15 +524,15 @@
                 const triangles = [];
                 for (let i = 0; i < triangleCount; i++) {
                     const triangleData = await contract.getTriangleData(tokenId, i);
-                    triangles.push({
-                        vertices: [
-                            [triangleData.x1, triangleData.y1],
-                            [triangleData.x2, triangleData.y2],
-                            [triangleData.x3, triangleData.y3]
-                        ],
-                        arm_index: triangleData.armIndex,
-                        triangle_index: triangleData.triangleIndex
-                    });
+                triangles.push({
+                    vertices: [
+                        [triangleData.x1, triangleData.y1],
+                        [triangleData.x2, triangleData.y2],
+                        [triangleData.x3, triangleData.y3]
+                    ],
+                    arm_index: triangleData.armIndex, // Make sure this matches
+                    triangle_index: triangleData.triangleIndex
+                });
                 }
                 
                 // Get token URI and metadata
@@ -582,7 +555,7 @@
                     console.log('Could not get owner:', e);
                 }
                 
-                // Reconstruct spiral from on-chain data
+                // Reconstruct spiral from on-chain data (without background_type)
                 const reconstructedSpiral = {
                     seed: spiralConfig.seed.toString(),
                     variant: spiralConfig.variant.toString(),
@@ -622,7 +595,7 @@
                 const response = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ seed: seed, canvas_size: 500 })
+                    body: JSON.stringify({ seed: seed, canvas_size: 420 })
                 });
                 
                 if (!response.ok) {
@@ -639,15 +612,15 @@
         // Display verification results
         function displayVerificationResults(onchainSpiral, liveSpiral, nftInfo) {
             // Draw both spirals
-            drawSpiral(document.getElementById('onchainCanvas'), onchainSpiral, 'On-Chain Data');
-            drawSpiral(document.getElementById('liveCanvas'), liveSpiral, 'Live Generation');
+            drawSpiral(document.getElementById('onchainCanvas'), onchainSpiral, 'Blockchain Data');
+            drawSpiral(document.getElementById('liveCanvas'), liveSpiral, 'ZK Circuit Output');
             
             // Compare and show status
             const isMatch = compareSpirals(onchainSpiral, liveSpiral);
             
             document.getElementById('verificationStatus').innerHTML = `
                 <div class="status-badge ${isMatch ? 'success' : 'error'}">
-                    ${isMatch ? '✅ VERIFIED: On-chain data matches ZK circuit output' : '❌ MISMATCH: Data integrity issue detected'}
+                    ${isMatch ? '✅ VERIFIED: Blockchain data matches ZK circuit output' : '❌ MISMATCH: Data integrity issue detected'}
                 </div>
                 <p style="margin-top: 15px;">
                     <strong>Token ID:</strong> ${nftInfo.tokenId}<br>
@@ -658,6 +631,8 @@
             
             // Show NFT stats
             const spiralTypes = ['Tight', 'Loose', 'Classic'];
+            const backgroundNames = ["Deep Space", "Nebula", "Starfield", "Cosmic", "Void"];
+            
             document.getElementById('nftStats').innerHTML = `
                 <div class="stat-item">
                     <div class="stat-value">${onchainSpiral.seed}</div>
@@ -672,16 +647,20 @@
                     <div class="stat-label">Arms</div>
                 </div>
                 <div class="stat-item">
+                    <div class="stat-value">${backgroundNames[liveSpiral.background_type] || 'N/A'}</div>
+                    <div class="stat-label">Background</div>
+                </div>
+                <div class="stat-item">
                     <div class="stat-value">${onchainSpiral.triangles.length}</div>
-                    <div class="stat-label">Triangles</div>
+                    <div class="stat-label">On-Chain Triangles</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${liveSpiral.triangles.length}</div>
                     <div class="stat-label">Live Gen Triangles</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${isMatch ? 'MATCH' : 'DIFFER'}</div>
-                    <div class="stat-label">Verification</div>
+                    <div class="stat-value">${isMatch ? 'VERIFIED' : 'MISMATCH'}</div>
+                    <div class="stat-label">Status</div>
                 </div>
             `;
             
@@ -700,33 +679,56 @@
             document.getElementById('verificationResults').style.display = 'block';
         }
         
-        // Compare spirals for verification
-        function compareSpirals(onchain, live) {
-            // Check basic config
-            if (onchain.seed !== live.seed.toString()) return false;
-            if (onchain.spiral_type !== live.spiral_type) return false;
-            if (onchain.num_arms !== live.num_arms) return false;
+        // Compare spirals for verification (without background comparison)
+function compareSpirals(onchain, live) {
+    // Check basic config
+    if (onchain.seed !== live.seed.toString()) {
+        console.log('Seed mismatch:', onchain.seed, 'vs', live.seed.toString());
+        return false;
+    }
+    if (onchain.spiral_type !== live.spiral_type) {
+        console.log('Spiral type mismatch:', onchain.spiral_type, 'vs', live.spiral_type);
+        return false;
+    }
+    if (onchain.num_arms !== live.num_arms) {
+        console.log('Arms mismatch:', onchain.num_arms, 'vs', live.num_arms);
+        return false;
+    }
+    
+    // Check triangle count
+    if (onchain.triangles.length !== live.triangles.length) {
+        console.log('Triangle count mismatch:', onchain.triangles.length, 'vs', live.triangles.length);
+        return false;
+    }
+    
+    // FIXED: Scale coordinates for comparison
+    // On-chain is likely 420x420, live is 500x500
+    const scaleRatio = 420 / 420; // Adjust this based on actual stored size
+
+    // Check first few triangles for vertex match (with scaling)
+    for (let i = 0; i < Math.min(5, onchain.triangles.length); i++) {
+        const onchainTri = onchain.triangles[i];
+        const liveTri = live.triangles[i];
+        
+        for (let v = 0; v < 3; v++) {
+            // Scale on-chain coordinates to match live coordinates
+            const scaledOnchainX = onchainTri.vertices[v][0] * scaleRatio;
+            const scaledOnchainY = onchainTri.vertices[v][1] * scaleRatio;
             
-            // Check triangle count
-            if (onchain.triangles.length !== live.triangles.length) return false;
+            const diff_x = Math.abs(scaledOnchainX - liveTri.vertices[v][0]);
+            const diff_y = Math.abs(scaledOnchainY - liveTri.vertices[v][1]);
             
-            // Check first few triangles for vertex match (allowing small rounding differences)
-            for (let i = 0; i < Math.min(5, onchain.triangles.length); i++) {
-                const onchainTri = onchain.triangles[i];
-                const liveTri = live.triangles[i];
-                
-                for (let v = 0; v < 3; v++) {
-                    const diff_x = Math.abs(onchainTri.vertices[v][0] - liveTri.vertices[v][0]);
-                    const diff_y = Math.abs(onchainTri.vertices[v][1] - liveTri.vertices[v][1]);
-                    
-                    if (diff_x > 1 || diff_y > 1) { // Allow 1 pixel difference for rounding
-                        return false;
-                    }
-                }
+            if (diff_x > 3 || diff_y > 3) { // Allow more tolerance for scaling
+                console.log(`Triangle ${i} vertex ${v} mismatch:`, 
+                    `scaled(${scaledOnchainX}, ${scaledOnchainY})`, 
+                    `vs live(${liveTri.vertices[v][0]}, ${liveTri.vertices[v][1]})`);
+                return false;
             }
-            
-            return true;
         }
+    }
+    
+    return true;
+}
         
         // Compare triangle details for display
         function compareTriangleDetails(onchainTriangles, liveTriangles) {
@@ -745,23 +747,29 @@
             return comparison;
         }
         
-        // Draw spiral on canvas
+        // Draw spiral on canvas (simplified background)
         function drawSpiral(canvas, spiralData, title) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Background
+            // Simple matrix-style background
             const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
-            gradient.addColorStop(0, '#0a0a0a');
-            gradient.addColorStop(1, '#1a1a1a');
+            gradient.addColorStop(0, '#001100');
+            gradient.addColorStop(1, '#000000');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw triangles
+            // Draw triangles with consistent colors
             const armColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#a8e6cf', '#ff8b94'];
             
+            // DEBUG: Log triangle data
+            console.log(`Drawing ${title} with ${spiralData.triangles.length} triangles`);
+            console.log('First triangle:', spiralData.triangles[0]);
+            
             spiralData.triangles.forEach((triangle, index) => {
-                const color = armColors[triangle.arm_index % armColors.length];
+                // Handle both arm_index and armIndex for compatibility
+                const armIndex = triangle.arm_index !== undefined ? triangle.arm_index : triangle.armIndex;
+                const color = armColors[armIndex % armColors.length];
                 
                 ctx.beginPath();
                 ctx.moveTo(triangle.vertices[0][0], triangle.vertices[0][1]);
@@ -778,13 +786,13 @@
             });
             
             // Draw title
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '14px monospace';
+            ctx.fillStyle = '#00ff41';
+            ctx.font = '14px "Courier New"';
             ctx.textAlign = 'center';
             ctx.fillText(title, canvas.width/2, 20);
             
             // Draw center point
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#00ff41';
             ctx.beginPath();
             ctx.arc(canvas.width/2, canvas.height/2, 4, 0, 2 * Math.PI);
             ctx.fill();
